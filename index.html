@@ -68,9 +68,9 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-s
   <section id="s-bug" hidden><h2>Баги</h2><p class="lead">Опишите, что сломалось и как это повторить.</p><div id="b-bug"></div></section>
   <section id="s-dev" hidden><h2>Заявка на разработчика</h2><p class="lead">Хотите помогать проекту? Расскажите, что умеете. Мы ответим в Discord.</p><div id="b-dev"></div></section>
   <section id="s-my" hidden><h2>Мои обращения</h2><p class="lead">Копии отправленных обращений хранятся в этом браузере.</p><div id="b-my"></div></section>
-  <section id="s-adm" hidden><h2>Админка</h2><p class="lead">Только для администрации. Войдите под своим ником.</p>
+  <section id="s-adm" hidden><h2>Админка</h2><p class="lead">Только для администрации.</p>
     <form class="card" id="a-login" style="max-width:380px"><h3>Вход</h3>
-      <label>Ник<input id="a-u" autocomplete="username" required></label>
+      <label>Ник в Discord<input id="a-u" autocomplete="username" required></label>
       <label>Пароль<input id="a-p" type="password" autocomplete="current-password" required></label>
       <p class="err" id="a-lerr" role="alert" hidden></p><button class="btn" type="submit" id="a-lb">Войти</button></form>
     <div id="a-app" hidden>
@@ -96,7 +96,7 @@ function copy(txt,btn){var d=function(){var o=btn.textContent;btn.textContent='�
 /* форма: [имя, подпись, тип, обязательное, варианты] */
 var ME=['me','Ваш ник в Roblox','text',1];
 var F={
-reg:{t:'Заявка на регистрацию',f:[['nick','Ник в Roblox','nick',1],['ds','Ник в Discord','text',1],['age','Возраст','age',1],['rp','Имя и фамилия персонажа','text',1],
+reg:{t:'Заявка на регистрацию',f:[['nick','Ник в Roblox','nick',1],['ds','Ник в Discord','text',1],['age','Возраст','age',1],
   ['src','Как узнали о проекте','select',1,['От друзей','Через Discord','В Roblox','Другое']],['rules','Я прочитал правила в Discord и согласен их соблюдать','check',1]],cap:1,btn:'Зарегистрироваться'},
 admin:{t:'Жалоба на администрацию',p:'ЖА',f:[ME,['target','Ник администратора','text',1],['rank','Должность (если знаете)','text',0],['when','Когда это произошло','datetime-local',1],['text','Что произошло','area',1],['proof','Ссылка на доказательства (видео, скриншоты)','url',1]]},
 gov:{t:'Жалоба на гос. сотрудника',p:'ЖГ',f:[ME,['target','Ник сотрудника','text',1],['rank','Организация и должность (полиция, EMS…)','text',1],['when','Когда это произошло','datetime-local',1],['text','Что произошло','area',1],['proof','Ссылка на доказательства (видео, скриншоты)','url',1]]},
@@ -158,12 +158,12 @@ function done(box,title,lines,text,again){
 /* регистрация */
 function reg(){var box=$('#b-reg'),u=ld('pyrp_user',null);
   if(u){box.textContent='';var c=el('div','card');c.appendChild(el('h3','ok','Вы зарегистрированы'));
-    c.appendChild(el('p','','Roblox: '+u.nick));c.appendChild(el('p','','Discord: '+u.ds));c.appendChild(el('p','','Персонаж: '+u.rp+', '+u.age+' лет'));
+    c.appendChild(el('p','','Roblox: '+u.nick));c.appendChild(el('p','','Discord: '+u.ds));c.appendChild(el('p','','Возраст: '+u.age));
     c.appendChild(el('p','meta','Следующий шаг: напишите в Discord, чтобы получить роль игрока.'));
     var b=el('button','btn g','Выйти из профиля');b.onclick=function(){sv('pyrp_user',null);reg();forms()};c.appendChild(b);box.appendChild(c);return}
   build(box,'reg',function(d,def,er,sb){
     sb.disabled=true;er.hidden=true;
-    send('registrations',{nick:d.nick,discord:d.ds,age:+d.age,rp_name:d.rp,source:d.src}).then(function(){sv('pyrp_user',d);reg();forms()},function(c){sb.disabled=false;er.textContent=c==409?'Этот ник уже зарегистрирован.':'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.';er.hidden=false})})}
+    send('registrations',{nick:d.nick,discord:d.ds,age:+d.age,source:d.src}).then(function(){sv('pyrp_user',d);reg();forms()},function(c){sb.disabled=false;er.textContent=c==409?'Этот ник уже зарегистрирован.':'Не удалось отправить. Проверьте интернет и попробуйте ещё раз.';er.hidden=false})})}
 
 /* обращения */
 function ticket(box,key,again){build(box,key,function(data,def,er,sb){
@@ -202,9 +202,10 @@ function api(path,o){o=o||{};var h={apikey:KEY,'Content-Type':'application/json'
     if(!r.ok)throw r.status;
     return r.status==204?null:r.text().then(function(t){return t?JSON.parse(t):null})})}
 
+function who(){try{var p=JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));var m=p.user_metadata||{};return (m.custom_claims&&m.custom_claims.global_name)||m.full_name||m.name||'админ'}catch(e){return 'админ'}}
 function enter(){api('/rest/v1/admins?select=nick').then(function(rows){
   if(!rows||!rows.length){logout('У этого аккаунта нет прав администратора.');return}
-  admShow();$('#a-who').textContent='Вы вошли как '+rows[0].nick;$('#a-login').hidden=true;$('#a-app').hidden=false;$('#a-out').hidden=false;load()},
+  admShow();$('#a-who').textContent='Вы вошли как '+rows[0].nick+' (Discord)';$('#a-login').hidden=true;$('#a-app').hidden=false;$('#a-out').hidden=false;load()},
   function(e){if(e!==401)logout('Не удалось проверить доступ (код '+e+').')})}
 
 $('#a-login').onsubmit=function(e){e.preventDefault();var id=$('#a-u').value.trim(),email=id.indexOf('@')>0?id:id.toLowerCase()+'@patyah-rp.com',b=$('#a-lb');
@@ -235,7 +236,7 @@ function render(rows,tbl){var list=$('#a-list'),reg=tbl=='registrations';list.te
     c.appendChild(el('h3','',reg?r.nick:(KN[r.kind]||r.kind)+' · '+r.author));
     c.appendChild(el('p','meta',new Date(r.created_at).toLocaleString('ru-RU')+' · №'+r.id));
     function line(l,v){if(v===null||v===undefined||v==='')return;var p=el('p','ln');p.appendChild(el('b','',l+': '));p.appendChild(document.createTextNode(String(v)));c.appendChild(p)}
-    if(reg){line('Discord',r.discord);line('Возраст',r.age);line('Персонаж',r.rp_name);line('Откуда узнал(а)',r.source)}
+    if(reg){line('Discord',r.discord);line('Возраст',r.age);line('Откуда узнал(а)',r.source)}
     else{line('Ник Roblox автора',r.author);line('На кого / тема',r.target);line('Название',r.title);
       var x=r.extra||{};Object.keys(x).forEach(function(k){line(XL[k]||k,x[k])});
       if(r.body)c.appendChild(el('pre','',r.body));
@@ -261,6 +262,7 @@ COMP.forEach(function(k){var b=el('button','',CL[k]);b.dataset.k=k;b.onclick=fun
 reg();forms();my();show('reg');
 function hashAdm(){if(location.hash=='#admin'){admShow();show('adm')}}
 hashAdm();window.addEventListener('hashchange',hashAdm);
+
 })();
 </script>
 </body>

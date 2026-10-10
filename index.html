@@ -53,6 +53,36 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-s
 .row{align-items:center}.row select{width:auto;margin:0}
 .pw{display:flex;gap:8px;align-items:stretch;margin-top:5px}.pw input{margin-top:0;flex:1;min-width:0}.pw .btn{padding:0 14px;white-space:nowrap}
 footer a{color:var(--muted)}
+.hero{position:relative;height:470px;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 50% 110%,#5a2d6e 0,#1b2347 45%,#0a1020 100%);border:1px solid var(--line);color:#fff;touch-action:pan-y}
+.sun{position:absolute;left:50%;top:8%;width:170px;height:170px;margin-left:-85px;border-radius:50%;background:linear-gradient(#ffe08a,#f2a33a 55%,#e0457b);box-shadow:0 0 90px 20px rgba(224,69,123,.35);-webkit-mask:linear-gradient(#000,#000) top/100% 52% no-repeat,repeating-linear-gradient(#000 0 10px,transparent 10px 15px) bottom/100% 48% no-repeat;mask:linear-gradient(#000,#000) top/100% 52% no-repeat,repeating-linear-gradient(#000 0 10px,transparent 10px 15px) bottom/100% 48% no-repeat}
+.scene{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 30%}
+.world{position:absolute;inset:0;transform-style:preserve-3d}
+.spin{position:absolute;left:50%;top:60%;transform-style:preserve-3d;animation:spin 80s linear infinite}
+@keyframes spin{to{transform:rotateY(360deg)}}
+.floor{position:absolute;left:-520px;top:-520px;width:1040px;height:1040px;transform:rotateX(90deg);background:linear-gradient(rgba(242,163,58,.35) 2px,transparent 2px) 0 0/55px 55px,linear-gradient(90deg,rgba(242,163,58,.35) 2px,transparent 2px) 0 0/55px 55px,radial-gradient(circle,#1c1740 0,#0b1024 70%);-webkit-mask-image:radial-gradient(circle,#000 35%,transparent 70%);mask-image:radial-gradient(circle,#000 35%,transparent 70%)}
+.b{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.b i{position:absolute;left:calc(var(--w)/-2);bottom:0;width:var(--w);height:var(--h);background:radial-gradient(rgba(255,214,120,.9) 1.3px,transparent 2.2px) 4px 5px/11px 16px,linear-gradient(hsl(var(--t) 45% 24%),hsl(var(--t) 55% 11%));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 0 0 999px rgba(0,0,0,.05)}
+.b i:nth-child(1){transform:translateZ(calc(var(--w)/2))}
+.b i:nth-child(2){transform:rotateY(90deg) translateZ(calc(var(--w)/2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 0 0 999px rgba(0,0,0,.3)}
+.b i:nth-child(3){transform:rotateY(180deg) translateZ(calc(var(--w)/2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 0 0 999px rgba(0,0,0,.5)}
+.b i:nth-child(4){transform:rotateY(270deg) translateZ(calc(var(--w)/2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),inset 0 0 0 999px rgba(0,0,0,.18)}
+.b i:nth-child(5){height:var(--w);bottom:calc(var(--h) - var(--w)/2);transform:rotateX(90deg);background:hsl(var(--t) 40% 32%);box-shadow:none}
+.tw i:nth-child(5){background:#f2a33a;box-shadow:0 0 60px 14px rgba(242,163,58,.8)}
+.car{position:absolute;left:-6px;top:-18px;width:12px;height:36px;border-radius:6px;background:var(--c);box-shadow:0 0 14px 4px var(--c);animation:drive 7s linear infinite;animation-delay:var(--d)}
+@keyframes drive{from{transform:translate3d(var(--x),-2px,-400px) rotateX(90deg)}to{transform:translate3d(var(--x),-2px,400px) rotateX(90deg)}}
+.hero-t{position:absolute;left:0;right:0;bottom:0;padding:80px 24px 24px;background:linear-gradient(transparent,rgba(8,12,26,.94) 60%)}
+.hero-t h2{font-size:clamp(30px,7vw,56px);letter-spacing:.02em;text-shadow:0 1px 0 #7a4a08,0 2px 0 #6e4207,0 3px 0 #623b06,0 4px 0 #563405,0 5px 0 #4a2d04,0 14px 22px rgba(0,0,0,.55)}
+.hero-t h2 em{font-style:normal;color:#f2a33a}
+.hero-t p{color:#c5cee6;margin:8px 0 16px;max-width:46ch}
+.hero-t .row{display:flex;gap:10px;flex-wrap:wrap}
+.hero .btn.g{color:#fff;border-color:rgba(255,255,255,.35)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:18px}
+.tc{text-align:left;font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;transform-style:preserve-3d;will-change:transform}
+.tc:hover{border-color:var(--accent);box-shadow:0 18px 34px rgba(0,0,0,.28)}
+.tc b{display:block;font:700 17px Unbounded,sans-serif;margin-bottom:6px;transform:translateZ(22px)}
+.tc span{color:var(--muted);font-size:14px}
+@media (max-width:560px){.hero{height:420px}}
+@media (prefers-reduced-motion:reduce){.spin,.car{animation:none}.tc{transition:none}}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -64,6 +94,19 @@ footer a{color:var(--muted)}
 </div></header>
 <nav><div class="wrap" id="tabs"></div></nav>
 <main><div class="wrap">
+  <section id="s-home"><div class="hero" id="hero" role="img" aria-label="Трёхмерный ночной город Пат Ях">
+      <div class="sun"></div>
+      <div class="scene"><div class="world" id="world"><div class="spin" id="city"><div class="floor"></div></div></div></div>
+      <div class="hero-t"><h2>ПАТ ЯХ <em>RP</em></h2><p>Ролевой проект в Roblox. Свой город, свои правила и твоя история.</p>
+        <div class="row"><button class="btn" data-go="reg">Начать играть</button><a class="btn g" href="https://discord.gg/ZDh5hjMHdv" target="_blank" rel="noopener">Наш Discord</a></div></div>
+    </div>
+    <div class="tgrid">
+      <button class="tc" data-go="reg"><b>Регистрация</b><span>Создай профиль игрока</span></button>
+      <button class="tc" data-go="comp"><b>Жалобы</b><span>Сообщи о нарушении</span></button>
+      <button class="tc" data-go="idea"><b>Идеи и баги</b><span>Помоги сделать проект лучше</span></button>
+      <button class="tc" data-go="dev"><b>Разработчикам</b><span>Хочешь строить RP вместе с нами?</span></button>
+    </div>
+  </section>
   <section id="s-reg"><h2>Регистрация</h2><p class="lead">Создайте профиль игрока. Ник и Discord подставятся в ваши обращения.</p><div id="b-reg"></div></section>
   <section id="s-comp" hidden><h2>Жалобы</h2><p class="lead">Выберите, на кого хотите пожаловаться.</p><div class="chips" id="chips"></div><div id="b-comp"></div></section>
   <section id="s-idea" hidden><h2>Идеи</h2><p class="lead">Расскажите, что сделать на проекте лучше.</p><div id="b-idea"></div></section>
@@ -207,7 +250,8 @@ var XL={rank:'Должность / организация',when:'Когда',rul
 
 var SK='pyrp_sess',sess=null,rp=null;
 function em(id){id=id.trim().replace(/^@/,'');return id.indexOf('@')>0?id:id.toLowerCase()+'@patyah-rp.com'}
-function setS(x){sess=x;tok=x?x.a:null;try{localStorage.removeItem(SK);sessionStorage.removeItem(SK);if(x)(x.k?localStorage:sessionStorage).setItem(SK,JSON.stringify(x))}catch(e){}}
+function setS(x){sess=x;tok=x?x.a:null;try{localStorage.removeItem(SK);sessionStorage.removeItem(SK);if(x)(x.k?localStorage:sessionStorage).setItem(SK,JSON.stringify(x))}catch(e){}gate()}
+function gate(){var on=!!sess,b=document.querySelector('#tabs button[data-t="reg"]');if(b)b.hidden=on;document.querySelectorAll('[data-go="reg"]').forEach(function(e){e.hidden=on});if(on&&$('#tabs').children.length&&!$('#s-reg').hidden)show('home')}
 function mk(j,k,n){return {a:j.access_token,r:j.refresh_token,e:Date.now()+(j.expires_in||3600)*1000,k:!!k,n:n||''}}
 function authReq(p,body){return fetch(ADM+'/auth/v1/'+p,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)})
   .then(function(r){return r.json().then(function(j){if(!r.ok)throw {s:r.status,j:j};return j},function(){if(!r.ok)throw {s:r.status,j:{}};return {}})})}
@@ -287,12 +331,28 @@ try{var _s=JSON.parse(localStorage.getItem(SK)||sessionStorage.getItem(SK)||'nul
 
 function admShow(){document.querySelector('#tabs button[data-t="adm"]').hidden=false}
 /* навигация */
-var T=[['reg','Регистрация'],['login','Вход'],['comp','Жалобы'],['idea','Идеи'],['bug','Баги'],['dev','Разработчикам'],['my','Мои обращения'],['adm','Админка']];
-T.forEach(function(t){var b=el('button','',t[1]);b.dataset.t=t[0];if(t[0]=='adm')b.hidden=true;b.onclick=function(){show(t[0])};$('#tabs').appendChild(b)});
-function show(id){T.forEach(function(t){$('#s-'+t[0]).hidden=t[0]!=id});
+var T=[['home','Главная'],['reg','Регистрация'],['login','Вход'],['comp','Жалобы'],['idea','Идеи'],['bug','Баги'],['dev','Разработчикам'],['my','Мои обращения'],['adm','Админка']];
+T.forEach(function(t){var b=el('button','',t[1]);b.dataset.t=t[0];if(t[0]=='adm')b.hidden=true;b.onclick=function(){show(t[0])};$('#tabs').appendChild(b)}); gate();
+function show(id){document.querySelector('header').hidden=id=='home';T.forEach(function(t){$('#s-'+t[0]).hidden=t[0]!=id});
   document.querySelectorAll('#tabs button').forEach(function(b){b.setAttribute('aria-current',b.dataset.t==id)});if(id=='my')my()}
 COMP.forEach(function(k){var b=el('button','',CL[k]);b.dataset.k=k;b.onclick=function(){ccur=k;comp(k)};$('#chips').appendChild(b)});
-reg();forms();my();show('reg');
+(function(){var c=$('#city'),seed=11,h='',N=7,G=110,R=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+function r(){seed=seed*16807%2147483647;return seed/2147483647}
+for(var i=0;i<N;i++)for(var j=0;j<N;j++){var d=Math.max(Math.abs(i-3),Math.abs(j-3)),m=!d;if(!m&&r()<.14)continue;
+  var w=m?84:46+r()*28,H=m?330:50+r()*(150-d*28),t=m?32:(215+r()*75)|0;
+  h+='<div class="b'+(m?' tw':'')+'" style="--w:'+w+'px;--h:'+H+'px;--t:'+t+';transform:translate3d('+(i-3)*G+'px,0,'+(j-3)*G+'px)"><i></i><i></i><i></i><i></i><i></i></div>'}
+var col=['#f2a33a','#ff5d9e','#5ee7ff'];
+[-165,-55,55,165,-165,-55,55,165].forEach(function(x,k){h+='<div class="car" style="--x:'+x+'px;--c:'+col[k%3]+';--d:-'+(k*1.7).toFixed(1)+'s"></div>'});
+c.insertAdjacentHTML('beforeend',h);
+var hero=$('#hero'),wd=$('#world'),tx=0,ty=0,rx=0,ry=0;
+hero.addEventListener('pointermove',function(e){var b=hero.getBoundingClientRect();tx=(e.clientX-b.left)/b.width-.5;ty=(e.clientY-b.top)/b.height-.5});
+hero.addEventListener('pointerleave',function(){tx=ty=0});
+(function loop(){if(!$('#s-home').hidden){var sc=Math.min(.9,hero.clientWidth/880);if(!R){rx+=(ty*10-rx)*.07;ry+=(tx*30-ry)*.07}
+  wd.style.transform='scale('+sc+') rotateX('+(-26+rx)+'deg) rotateY('+ry+'deg)'}requestAnimationFrame(loop)})();
+document.querySelectorAll('.tc').forEach(function(k){k.addEventListener('pointermove',function(e){if(R)return;var b=k.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;k.style.transform='perspective(700px) rotateX('+(-y*14)+'deg) rotateY('+(x*14)+'deg) translateZ(8px)'});
+  k.addEventListener('pointerleave',function(){k.style.transform=''})});
+document.addEventListener('click',function(e){var g=e.target.closest&&e.target.closest('[data-go]');if(g){show(g.dataset.go);window.scrollTo(0,0)}})})();
+reg();forms();my();show('home');
 function hashAdm(){if(location.hash=='#admin')show('login')}
 hashAdm();window.addEventListener('hashchange',hashAdm);
 

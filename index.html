@@ -48,6 +48,9 @@ canvas{border-radius:8px;border:1px solid var(--line);max-width:100%}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 pre{white-space:pre-wrap;font:14px/1.5 Onest,sans-serif;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}
 footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:14px}
+.btn.d{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.ln{margin:4px 0;font-size:15px;overflow-wrap:anywhere}
+.row{align-items:center}.row select{width:auto;margin:0}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -65,6 +68,17 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-s
   <section id="s-bug" hidden><h2>Баги</h2><p class="lead">Опишите, что сломалось и как это повторить.</p><div id="b-bug"></div></section>
   <section id="s-dev" hidden><h2>Заявка на разработчика</h2><p class="lead">Хотите помогать проекту? Расскажите, что умеете. Мы ответим в Discord.</p><div id="b-dev"></div></section>
   <section id="s-my" hidden><h2>Мои обращения</h2><p class="lead">Копии отправленных обращений хранятся в этом браузере.</p><div id="b-my"></div></section>
+  <section id="s-adm" hidden><h2>Админка</h2><p class="lead">Только для администрации. Войдите под своим ником.</p>
+    <form class="card" id="a-login" style="max-width:380px"><h3>Вход</h3>
+      <label>Ник<input id="a-u" autocomplete="username" required></label>
+      <label>Пароль<input id="a-p" type="password" autocomplete="current-password" required></label>
+      <p class="err" id="a-lerr" role="alert" hidden></p><button class="btn" type="submit" id="a-lb">Войти</button></form>
+    <div id="a-app" hidden>
+      <div class="row" style="margin-bottom:14px"><span class="meta" id="a-who" style="margin:0"></span><button class="btn g" id="a-out">Выйти</button></div>
+      <div class="chips" id="a-kinds"></div>
+      <div class="row" style="margin:0 0 14px"><label style="margin:0">Статус <select id="a-st"></select></label><button class="btn g" id="a-ref" type="button">Обновить</button><span class="meta" id="a-cnt" style="margin:0"></span></div>
+      <div id="a-list"></div>
+    </div></section>
 </div></main>
 <footer><div class="wrap">Пат Ях RP. Не связан с Roblox Corporation.</div></footer>
 
@@ -171,13 +185,82 @@ function my(){var box=$('#b-my'),list=ld('pyrp_tickets',[]);box.textContent='';
     c.appendChild(el('p','meta',new Date(t.at).toLocaleString('ru-RU')+' · Статус: отправлено'));
     var b=el('button','btn g','Скопировать текст');b.onclick=function(){copy(t.text,b)};c.appendChild(b);box.appendChild(c)})}
 
+var ADM='https://eukwyynaayipybaymgxf.supabase.co';
+/* админка */
+var tok=null,kind='reg',stat='all';
+var KINDS=[['reg','Регистрации'],['admin','Жалобы на админов'],['gov','Жалобы на гос. сотрудников'],['player','Жалобы на игроков'],['org','Жалобы на организации'],['idea','Идеи'],['bug','Баги'],['dev','Разработчики'],['all','Все обращения']];
+var KN={admin:'Жалоба на администрацию',gov:'Жалоба на гос. сотрудника',player:'Жалоба на игрока',org:'Жалоба на организацию',idea:'Идея',bug:'Баг',dev:'Заявка на разработчика'};
+var ST=[['new','Новое'],['work','В работе'],['done','Готово'],['no','Отклонено']];
+var XL={rank:'Должность / организация',when:'Когда',rule:'Нарушение',cat:'Раздел',place:'Где',ds:'Discord',role:'Роль',hours:'Часов в неделю'};
+
+function save(t){tok=t;try{t?sessionStorage.setItem('pyrp_tok',t):sessionStorage.removeItem('pyrp_tok')}catch(e){}}
+function logout(msg){save(null);$('#a-app').hidden=true;$('#a-out').hidden=true;$('#a-login').hidden=false;$('#a-who').textContent='';
+  var e=$('#a-lerr');if(msg){e.textContent=msg;e.hidden=false}else e.hidden=true}
+function api(path,o){o=o||{};var h={apikey:KEY,'Content-Type':'application/json'};if(tok)h.Authorization='Bearer '+tok;if(o.prefer)h.Prefer=o.prefer;
+  return fetch(ADM+path,{method:o.method||'GET',headers:h,body:o.body?JSON.stringify(o.body):undefined}).then(function(r){
+    if(r.status==401){logout('Сессия истекла. Войдите снова.');throw 401}
+    if(!r.ok)throw r.status;
+    return r.status==204?null:r.text().then(function(t){return t?JSON.parse(t):null})})}
+
+function enter(){api('/rest/v1/admins?select=nick').then(function(rows){
+  if(!rows||!rows.length){logout('У этого аккаунта нет прав администратора.');return}
+  admShow();$('#a-who').textContent='Вы вошли как '+rows[0].nick;$('#a-login').hidden=true;$('#a-app').hidden=false;$('#a-out').hidden=false;load()},
+  function(e){if(e!==401)logout('Не удалось проверить доступ (код '+e+').')})}
+
+$('#a-login').onsubmit=function(e){e.preventDefault();var id=$('#a-u').value.trim(),email=id.indexOf('@')>0?id:id.toLowerCase()+'@patyah-rp.com',b=$('#a-lb');
+  b.disabled=true;$('#a-lerr').hidden=true;
+  fetch(ADM+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:$('#a-p').value})})
+  .then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j})})
+  .then(function(j){$('#a-p').value='';save(j.access_token);enter()},function(){logout('Неверный ник или пароль.')})
+  .then(function(){b.disabled=false})};
+$('#a-out').onclick=function(){logout();document.querySelector('#tabs button[data-t="adm"]').hidden=true;show('reg');try{history.replaceState(null,'',location.pathname)}catch(e){}};
+$('#a-ref').onclick=function(){load()};
+
+KINDS.forEach(function(k){var b=el('button','',k[1]);b.dataset.k=k[0];b.onclick=function(){kind=k[0];load()};$('#a-kinds').appendChild(b)});
+var sel=$('#a-st');[['all','Все']].concat(ST).forEach(function(s){var o=el('option','',s[1]);o.value=s[0];sel.appendChild(o)});
+sel.onchange=function(){stat=sel.value;load()};
+
+function load(){var list=$('#a-list'),reg=kind=='reg',tbl=reg?'registrations':'tickets';
+  document.querySelectorAll('#a-kinds button').forEach(function(b){b.setAttribute('aria-current',b.dataset.k==kind)});
+  list.textContent='Загрузка…';$('#a-cnt').textContent='';
+  var q='/rest/v1/'+tbl+'?select=*&order=created_at.desc&limit=300';
+  if(!reg&&kind!='all')q+='&kind=eq.'+kind;
+  if(stat!='all')q+='&status=eq.'+stat;
+  api(q).then(function(rows){render(rows||[],tbl)},function(e){if(e!==401)list.textContent='Не удалось загрузить данные (код '+e+').'})}
+
+function render(rows,tbl){var list=$('#a-list'),reg=tbl=='registrations';list.textContent='';
+  $('#a-cnt').textContent='Найдено: '+rows.length;
+  if(!rows.length){list.appendChild(el('p','meta','Здесь пока ничего нет.'));return}
+  rows.forEach(function(r){var c=el('div','card');
+    c.appendChild(el('h3','',reg?r.nick:(KN[r.kind]||r.kind)+' · '+r.author));
+    c.appendChild(el('p','meta',new Date(r.created_at).toLocaleString('ru-RU')+' · №'+r.id));
+    function line(l,v){if(v===null||v===undefined||v==='')return;var p=el('p','ln');p.appendChild(el('b','',l+': '));p.appendChild(document.createTextNode(String(v)));c.appendChild(p)}
+    if(reg){line('Discord',r.discord);line('Возраст',r.age);line('Персонаж',r.rp_name);line('Откуда узнал(а)',r.source)}
+    else{line('Ник Roblox автора',r.author);line('На кого / тема',r.target);line('Название',r.title);
+      var x=r.extra||{};Object.keys(x).forEach(function(k){line(XL[k]||k,x[k])});
+      if(r.body)c.appendChild(el('pre','',r.body));
+      if(r.proof){var p=el('p','ln');p.appendChild(el('b','','Доказательства: '));
+        if(/^https?:\/\//i.test(r.proof)){var a=el('a','',r.proof);a.href=r.proof;a.target='_blank';a.rel='noopener noreferrer';p.appendChild(a)}else p.appendChild(document.createTextNode(r.proof));c.appendChild(p)}}
+    var row=el('div','row'),s=el('select');ST.forEach(function(t){var o=el('option','',t[1]);o.value=t[0];s.appendChild(o)});s.value=r.status;
+    var note=el('span','ok');
+    s.onchange=function(){api('/rest/v1/'+tbl+'?id=eq.'+r.id,{method:'PATCH',body:{status:s.value},prefer:'return=minimal'}).then(function(){note.textContent='Сохранено';setTimeout(function(){note.textContent=''},1500)},function(e){if(e!==401){note.textContent='';alert('Не удалось сохранить (код '+e+')')}})};
+    var d=el('button','btn d','Удалить');
+    d.onclick=function(){if(!confirm('Удалить навсегда?'))return;api('/rest/v1/'+tbl+'?id=eq.'+r.id,{method:'DELETE',prefer:'return=minimal'}).then(function(){c.remove()},function(e){if(e!==401)alert('Не удалось удалить (код '+e+')')})};
+    row.appendChild(s);row.appendChild(note);row.appendChild(d);c.appendChild(row);list.appendChild(c)})}
+
+
+try{var _t=sessionStorage.getItem('pyrp_tok');if(_t){tok=_t;enter()}}catch(e){}
+
+function admShow(){document.querySelector('#tabs button[data-t="adm"]').hidden=false}
 /* навигация */
-var T=[['reg','Регистрация'],['comp','Жалобы'],['idea','Идеи'],['bug','Баги'],['dev','Разработчикам'],['my','Мои обращения']];
-T.forEach(function(t){var b=el('button','',t[1]);b.dataset.t=t[0];b.onclick=function(){show(t[0])};$('#tabs').appendChild(b)});
+var T=[['reg','Регистрация'],['comp','Жалобы'],['idea','Идеи'],['bug','Баги'],['dev','Разработчикам'],['my','Мои обращения'],['adm','Админка']];
+T.forEach(function(t){var b=el('button','',t[1]);b.dataset.t=t[0];if(t[0]=='adm')b.hidden=true;b.onclick=function(){show(t[0])};$('#tabs').appendChild(b)});
 function show(id){T.forEach(function(t){$('#s-'+t[0]).hidden=t[0]!=id});
   document.querySelectorAll('#tabs button').forEach(function(b){b.setAttribute('aria-current',b.dataset.t==id)});if(id=='my')my()}
 COMP.forEach(function(k){var b=el('button','',CL[k]);b.dataset.k=k;b.onclick=function(){ccur=k;comp(k)};$('#chips').appendChild(b)});
 reg();forms();my();show('reg');
+function hashAdm(){if(location.hash=='#admin'){admShow();show('adm')}}
+hashAdm();window.addEventListener('hashchange',hashAdm);
 })();
 </script>
 </body>
